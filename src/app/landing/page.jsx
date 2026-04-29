@@ -7,7 +7,8 @@ import { InfiniteSlider } from '@/components/ui/infinite-slider'
 import { ProgressiveBlur } from '@/components/ui/progressive-blur'
 import { LayoutGrid } from '@/components/ui/layout-grid'
 import Link from 'next/link'
-import Image from 'next/image'
+import { motion } from 'framer-motion'
+import { Shield, Lock, Activity, Globe2, BookOpen, HeartPulse, Brain, MessagesSquare, Clock, Zap } from 'lucide-react'
 
 const Landing = () => {
     const featureCards = [
@@ -19,7 +20,7 @@ const Landing = () => {
                         AI-Guided Mental Health Support
                     </p>
                     <p className="font-normal text-base text-white"></p>
-                    <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
+                    <p className="font-normal text-base my-4 max-w-lg text-neutral-300">
                         Intelligent chatbot providing 24/7 emotional support with multilingual capabilities. 
                         Early detection algorithms identify students at risk and provide immediate interventions.
                     </p>
@@ -36,7 +37,7 @@ const Landing = () => {
                         Confidential Counseling
                     </p>
                     <p className="font-normal text-base text-white"></p>
-                    <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
+                    <p className="font-normal text-base my-4 max-w-lg text-neutral-300">
                         Secure booking system for anonymous counseling sessions. 
                         Connect students with professional counselors while maintaining complete privacy.
                     </p>
@@ -53,7 +54,7 @@ const Landing = () => {
                         Psychoeducational Hub
                     </p>
                     <p className="font-normal text-base text-white"></p>
-                    <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
+                    <p className="font-normal text-base my-4 max-w-lg text-neutral-300">
                         Comprehensive psychoeducational content covering stress management, 
                         coping strategies, and mental wellness in regional languages.
                     </p>
@@ -70,7 +71,7 @@ const Landing = () => {
                         Mood Assessment Tools
                     </p>
                     <p className="font-normal text-base text-white"></p>
-                    <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
+                    <p className="font-normal text-base my-4 max-w-lg text-neutral-300">
                         Comprehensive mood analysis using standardized psychological screening tools like PHQ-9, GAD-7, 
                         and GHQ to assess problem severity levels and provide personalized intervention strategies.
                     </p>
@@ -90,310 +91,262 @@ const Landing = () => {
         "Reduced stigma and increased counseling center efficiency significantly"
     ]
 
+    // Animation variants
+    const fadeInUp = {
+        hidden: { opacity: 0, y: 40 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+    };
+
+    const staggerContainer = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.15 }
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-background">
-            {/* Hero Section */}
+        <div className="min-h-screen bg-[#050505] text-slate-200 selection:bg-teal-500/30 font-sans">
             <HeroSection />
             
-            {/* Problem Statement Section */}
-            <section className="py-16 md:py-24 bg-muted/30">
-                <div className="container mx-auto px-6 max-w-6xl">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                            Addressing the Mental Health Crisis in Higher Education
+            {/* Stats / Problem Statement Section */}
+            <section className="py-24 relative overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                
+                <div className="container mx-auto px-6 max-w-6xl relative z-10">
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        variants={fadeInUp}
+                        className="text-center mb-20"
+                    >
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">
+                            The Crisis in Higher Education
                         </h2>
-                        <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-12">
+                        <p className="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto">
                             Students face unprecedented mental health challenges, but existing support systems fall short. 
                             Our platform bridges the gap with culturally-aware, accessible, and data-driven solutions.
                         </p>
-                    </div>
+                    </motion.div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="text-center p-6 bg-background rounded-lg shadow-sm border">
-                            <div className="text-3xl md:text-4xl font-bold text-primary mb-2">70%</div>
-                            <p className="text-sm text-muted-foreground">of students experience mental health challenges during college</p>
-                        </div>
-                        <div className="text-center p-6 bg-background rounded-lg shadow-sm border">
-                            <div className="text-3xl md:text-4xl font-bold text-primary mb-2">24/7</div>
-                            <p className="text-sm text-muted-foreground">availability ensures support when students need it most</p>
-                        </div>
-                        <div className="text-center p-6 bg-background rounded-lg shadow-sm border">
-                            <div className="text-3xl md:text-4xl font-bold text-primary mb-2">90%</div>
-                            <p className="text-sm text-muted-foreground">reduction in stigma through anonymous support options</p>
-                        </div>
-                    </div>
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                    >
+                        {[
+                            { stat: "70%", text: "of students experience mental health challenges during college", icon: Activity, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
+                            { stat: "24/7", text: "availability ensures support when students need it most", icon: Clock, color: "text-teal-400", bg: "bg-teal-500/10", border: "border-teal-500/20" },
+                            { stat: "90%", text: "reduction in stigma through anonymous support options", icon: Shield, color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20" }
+                        ].map((item, i) => (
+                            <motion.div 
+                                key={i}
+                                variants={fadeInUp}
+                                className={`relative group p-8 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/5 hover:${item.border} transition-all duration-500 hover:-translate-y-2`}
+                            >
+                                <div className={`w-14 h-14 rounded-2xl ${item.bg} flex items-center justify-center mb-6`}>
+                                    <item.icon className={`w-7 h-7 ${item.color}`} />
+                                </div>
+                                <div className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tighter">{item.stat}</div>
+                                <p className="text-slate-400 leading-relaxed">{item.text}</p>
+                                
+                                <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                            </motion.div>
+                        ))}
+                    </motion.div>
                 </div>
             </section>
             
             {/* Features Section with Layout Grid */}
-            <section id="features" className="py-16 md:py-24">
+            <section id="features" className="py-24 bg-[#0a0a0a] relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-teal-500/20 to-transparent" />
                 <div className="container mx-auto px-6 max-w-7xl">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                            Comprehensive Mental Health Solution
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeInUp}
+                        className="text-center mb-16"
+                    >
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">
+                            Comprehensive Solution
                         </h2>
-                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                        <p className="text-lg text-slate-400 max-w-2xl mx-auto">
                             Discover our integrated platform designed specifically for higher education institutions to support student mental wellness
                         </p>
-                    </div>
+                    </motion.div>
                     
-                    <LayoutGrid cards={featureCards} />
+                    <div className="h-[1200px] md:h-[800px]">
+                        <LayoutGrid cards={featureCards} />
+                    </div>
                 </div>
             </section>
 
             {/* Psychoeducation Hub Section */}
-            <section id="psychoeducation" className="py-16 md:py-24 bg-muted/30">
-                <div className="container mx-auto px-6 max-w-6xl">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            <section id="psychoeducation" className="py-24 relative overflow-hidden">
+                <div className="absolute -left-40 top-40 w-96 h-96 bg-blue-900/20 rounded-full blur-[100px] pointer-events-none" />
+                <div className="absolute -right-40 bottom-40 w-96 h-96 bg-purple-900/20 rounded-full blur-[100px] pointer-events-none" />
+
+                <div className="container mx-auto px-6 max-w-7xl relative z-10">
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeInUp}
+                        className="text-center mb-20"
+                    >
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">
                             Psychoeducation Hub
                         </h2>
-                        <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                            Comprehensive educational resources to help students understand and manage their mental health. 
-                            Evidence-based content designed by mental health professionals.
+                        <p className="text-lg text-slate-400 max-w-3xl mx-auto">
+                            Evidence-based content designed by mental health professionals to help students understand and manage their mind.
                         </p>
-                    </div>
+                    </motion.div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div className="bg-background rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow">
-                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">🧠</span>
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">Stress Management</h3>
-                            <p className="text-muted-foreground mb-4">
-                                Learn effective techniques to identify, understand, and manage academic and personal stress.
-                            </p>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Breathing exercises and mindfulness</span>
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-50px" }}
+                        variants={staggerContainer}
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    >
+                        {[
+                            { title: "Stress Management", icon: Zap, color: "text-amber-400", bg: "bg-amber-500/10", border: "group-hover:border-amber-500/30", items: ["Breathing exercises", "Time management", "Healthy coping"] },
+                            { title: "Anxiety & Depression", icon: HeartPulse, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "group-hover:border-emerald-500/30", items: ["Early warning signs", "CBT techniques", "Support networks"] },
+                            { title: "Academic Wellness", icon: BookOpen, color: "text-blue-400", bg: "bg-blue-500/10", border: "group-hover:border-blue-500/30", items: ["Study-life balance", "Academic pressure", "Goal setting"] },
+                            { title: "Relationship Skills", icon: MessagesSquare, color: "text-pink-400", bg: "bg-pink-500/10", border: "group-hover:border-pink-500/30", items: ["Effective communication", "Conflict resolution", "Setting boundaries"] },
+                            { title: "Work-Life Balance", icon: Activity, color: "text-violet-400", bg: "bg-violet-500/10", border: "group-hover:border-violet-500/30", items: ["Priority setting", "Self-care practices", "Preventing burnout"] },
+                            { title: "Crisis Resources", icon: Shield, color: "text-red-400", bg: "bg-red-500/10", border: "group-hover:border-red-500/30", items: ["Recognizing crisis", "Emergency contacts", "Professional help"] }
+                        ].map((cat, idx) => (
+                            <motion.div 
+                                key={idx}
+                                variants={fadeInUp}
+                                className={`group bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-300 ${cat.border}`}
+                            >
+                                <div className={`w-14 h-14 rounded-2xl ${cat.bg} flex items-center justify-center mb-6`}>
+                                    <cat.icon className={`w-7 h-7 ${cat.color}`} />
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Time management strategies</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Healthy coping mechanisms</span>
-                                </div>
-                            </div>
-                        </div>
+                                <h3 className="text-xl font-bold mb-4 text-white">{cat.title}</h3>
+                                <ul className="space-y-3">
+                                    {cat.items.map((item, i) => (
+                                        <li key={i} className="flex items-center text-slate-400 text-sm">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-slate-600 mr-3 group-hover:bg-slate-400 transition-colors" />
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </motion.div>
+                        ))}
+                    </motion.div>
 
-                        <div className="bg-background rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow">
-                            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">💚</span>
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">Anxiety & Depression</h3>
-                            <p className="text-muted-foreground mb-4">
-                                Understand the signs, symptoms, and effective strategies for managing anxiety and depression.
-                            </p>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Recognizing early warning signs</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Cognitive behavioral techniques</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Building support networks</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-background rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow">
-                            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">🎯</span>
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">Academic Wellness</h3>
-                            <p className="text-muted-foreground mb-4">
-                                Balance academic success with mental well-being through proven strategies and habits.
-                            </p>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Study-life balance techniques</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Dealing with academic pressure</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Goal setting and motivation</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-background rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow">
-                            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">🤝</span>
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">Relationship Skills</h3>
-                            <p className="text-muted-foreground mb-4">
-                                Build healthy relationships and communication skills for better social connections.
-                            </p>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Effective communication</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Conflict resolution</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Setting healthy boundaries</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-background rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow">
-                            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">⚖️</span>
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">Work-Life Balance</h3>
-                            <p className="text-muted-foreground mb-4">
-                                Learn to balance academics, work, and personal life for optimal mental health.
-                            </p>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Priority setting and planning</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Self-care practices</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Preventing burnout</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-background rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow">
-                            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">🆘</span>
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">Crisis Resources</h3>
-                            <p className="text-muted-foreground mb-4">
-                                Know when and how to seek help during mental health emergencies and crises.
-                            </p>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Recognizing crisis situations</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Emergency contact information</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                    <span>Professional help resources</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="text-center mt-12">
-                        <Button asChild size="lg" className="px-8">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mt-16"
+                    >
+                        <Button asChild size="lg" className="px-8 bg-white text-black hover:bg-gray-200 rounded-full font-semibold">
                             <Link href="/resources">
                                 Access Full Resource Library
                             </Link>
                         </Button>
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
             {/* Security & Privacy Section */}
-            <section className="py-16 md:py-24 bg-primary/5">
+            <section className="py-24 bg-[#0a0a0a] relative border-y border-white/5">
                 <div className="container mx-auto px-6 max-w-6xl">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeInUp}
+                        className="text-center mb-16"
+                    >
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">
                             Privacy & Security First
                         </h2>
-                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                            We understand the sensitive nature of mental health data. Our platform is built with enterprise-grade security and complete anonymity.
+                        <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+                            Enterprise-grade security built into the core. Complete anonymity guaranteed.
                         </p>
-                    </div>
+                    </motion.div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div className="text-center p-6">
-                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                                <span className="text-2xl">🔒</span>
-                            </div>
-                            <h3 className="font-semibold mb-2">End-to-End Encryption</h3>
-                            <p className="text-sm text-muted-foreground">All communications and data are fully encrypted</p>
-                        </div>
-                        <div className="text-center p-6">
-                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                                <span className="text-2xl">👤</span>
-                            </div>
-                            <h3 className="font-semibold mb-2">Anonymous Access</h3>
-                            <p className="text-sm text-muted-foreground">Students can access support without revealing identity</p>
-                        </div>
-                        <div className="text-center p-6">
-                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                                <span className="text-2xl">📋</span>
-                            </div>
-                            <h3 className="font-semibold mb-2">HIPAA Compliant</h3>
-                            <p className="text-sm text-muted-foreground">Meets all healthcare data protection standards</p>
-                        </div>
-                        <div className="text-center p-6">
-                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                                <span className="text-2xl">🌐</span>
-                            </div>
-                            <h3 className="font-semibold mb-2">Regional Compliance</h3>
-                            <p className="text-sm text-muted-foreground">Adheres to local data protection laws</p>
-                        </div>
-                    </div>
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                    >
+                        {[
+                            { title: "End-to-End Encrypted", icon: Lock, desc: "All communications are secured" },
+                            { title: "Anonymous Access", icon: Shield, desc: "No identity required for help" },
+                            { title: "HIPAA Compliant", icon: Activity, desc: "Healthcare standard protection" },
+                            { title: "Regional Compliant", icon: Globe2, desc: "Adheres to local data laws" }
+                        ].map((sec, i) => (
+                            <motion.div key={i} variants={fadeInUp} className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-3xl hover:bg-white/5 transition-colors">
+                                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-6">
+                                    <sec.icon className="w-6 h-6 text-white" />
+                                </div>
+                                <h3 className="font-semibold text-white mb-2">{sec.title}</h3>
+                                <p className="text-sm text-slate-400">{sec.desc}</p>
+                            </motion.div>
+                        ))}
+                    </motion.div>
                 </div>
             </section>
 
-            {/* Testimonials Section with Infinite Slider */}
-            <section className="py-16 md:py-24">
-                <div className="container mx-auto px-6 max-w-6xl">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                            What Institutions Say
+            {/* Testimonials Section */}
+            <section className="py-24 overflow-hidden relative">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-teal-900/10 blur-[100px] rounded-[100%]" />
+                <div className="container mx-auto px-6 max-w-6xl relative z-10">
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeInUp}
+                        className="text-center mb-16"
+                    >
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">
+                            Trusted Nationwide
                         </h2>
-                        <p className="text-lg text-muted-foreground">
-                            Trusted by universities and colleges nationwide
-                        </p>
-                    </div>
+                    </motion.div>
                     
                     <div className="relative">
+                        {/* Gradient Masks for Slider */}
+                        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
+                        
                         <InfiniteSlider 
-                            gap={32} 
-                            speed={50} 
-                            speedOnHover={20}
+                            gap={24} 
+                            speed={40} 
+                            speedOnHover={15}
                             className="py-8"
                         >
                             {testimonials.map((testimonial, index) => (
                                 <div 
                                     key={index} 
-                                    className="flex-shrink-0 w-80 bg-card border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
+                                    className="flex-shrink-0 w-80 bg-white/5 border border-white/10 backdrop-blur-md rounded-3xl p-8 hover:bg-white/10 transition-colors"
                                 >
-                                    <div className="flex items-start space-x-1 mb-3">
+                                    <div className="flex items-start space-x-1 mb-6">
                                         {[...Array(5)].map((_, i) => (
-                                            <span key={i} className="text-yellow-400">⭐</span>
+                                            <span key={i} className="text-teal-400 text-sm">★</span>
                                         ))}
                                     </div>
-                                    <p className="text-card-foreground italic">
+                                    <p className="text-slate-300 italic mb-8 leading-relaxed">
                                         "{testimonial}"
                                     </p>
-                                    <div className="mt-4 flex items-center space-x-3">
-                                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                                            <span className="text-sm">👤</span>
+                                    <div className="flex items-center space-x-4">
+                                        <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
+                                            <Brain className="w-5 h-5 text-slate-300" />
                                         </div>
                                         <div>
-                                            <p className="font-medium text-sm">Student Affairs Director</p>
-                                            <p className="text-xs text-muted-foreground">University #{index + 1}</p>
+                                            <p className="font-semibold text-white text-sm">Student Affairs Director</p>
+                                            <p className="text-xs text-slate-400">University #{index + 1}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -404,135 +357,73 @@ const Landing = () => {
             </section>
 
             {/* About Section */}
-            <section id="about" className="py-16 md:py-24">
+            <section id="about" className="py-24 bg-[#0a0a0a] border-t border-white/5">
                 <div className="container mx-auto px-6 max-w-6xl">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        <div>
-                            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                                About Our Mission
-                            </h2>
-                            <p className="text-lg text-muted-foreground mb-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <motion.div 
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            variants={staggerContainer}
+                        >
+                            <motion.h2 variants={fadeInUp} className="text-3xl md:text-5xl font-bold mb-8 tracking-tight">
+                                Our Mission
+                            </motion.h2>
+                            <motion.p variants={fadeInUp} className="text-lg text-slate-400 mb-6 leading-relaxed">
                                 We believe every student deserves access to mental health support that is immediate, 
                                 culturally sensitive, and free from stigma. Our platform was designed by mental health 
-                                professionals and educators who understand the unique challenges facing today's students.
-                            </p>
-                            <p className="text-muted-foreground mb-8">
-                                By combining AI technology with human compassion, we're creating a new standard for 
-                                student mental health support that respects privacy, embraces diversity, and 
-                                empowers students to take control of their well-being.
-                            </p>
+                                professionals who understand the unique challenges facing today's students.
+                            </motion.p>
                             
-                            <div className="space-y-4">
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                                        <span className="text-sm">✓</span>
+                            <motion.div variants={fadeInUp} className="space-y-4 mt-8">
+                                {[
+                                    "Evidence-based mental health interventions",
+                                    "Culturally inclusive and multilingual support",
+                                    "Seamless integration with campus resources"
+                                ].map((point, i) => (
+                                    <div key={i} className="flex items-center space-x-4">
+                                        <div className="w-6 h-6 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0">
+                                            <div className="w-2 h-2 rounded-full bg-teal-400" />
+                                        </div>
+                                        <span className="text-slate-300">{point}</span>
                                     </div>
-                                    <span className="text-sm">Evidence-based mental health interventions</span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                                        <span className="text-sm">✓</span>
-                                    </div>
-                                    <span className="text-sm">Culturally inclusive and multilingual support</span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                                        <span className="text-sm">✓</span>
-                                    </div>
-                                    <span className="text-sm">Seamless integration with existing campus resources</span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                                        <span className="text-sm">✓</span>
-                                    </div>
-                                    <span className="text-sm">Continuous improvement through student feedback</span>
-                                </div>
-                            </div>
-                        </div>
+                                ))}
+                            </motion.div>
+                        </motion.div>
                         
-                        <div className="relative">
-                            <div className="bg-gradient-to-br from-primary/10 to-primary/20 rounded-2xl p-8">
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div className="text-center">
-                                        <div className="text-3xl font-bold text-primary mb-2">50K+</div>
-                                        <p className="text-sm text-muted-foreground">Students Supported</p>
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="relative"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/20 to-indigo-500/20 rounded-[3rem] blur-2xl" />
+                            <div className="relative bg-[#050505]/80 backdrop-blur-xl border border-white/10 rounded-[3rem] p-10 shadow-2xl">
+                                <div className="grid grid-cols-2 gap-8">
+                                    <div className="text-center p-4 bg-white/5 rounded-2xl border border-white/5">
+                                        <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-teal-400 to-teal-600 mb-2">50K+</div>
+                                        <p className="text-sm font-medium text-slate-400">Students Supported</p>
                                     </div>
-                                    <div className="text-center">
-                                        <div className="text-3xl font-bold text-primary mb-2">100+</div>
-                                        <p className="text-sm text-muted-foreground">Partner Institutions</p>
+                                    <div className="text-center p-4 bg-white/5 rounded-2xl border border-white/5">
+                                        <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-indigo-600 mb-2">100+</div>
+                                        <p className="text-sm font-medium text-slate-400">Partner Institutions</p>
                                     </div>
-                                    <div className="text-center">
-                                        <div className="text-3xl font-bold text-primary mb-2">24/7</div>
-                                        <p className="text-sm text-muted-foreground">Available Support</p>
+                                    <div className="text-center p-4 bg-white/5 rounded-2xl border border-white/5">
+                                        <div className="text-4xl font-black text-white mb-2">24/7</div>
+                                        <p className="text-sm font-medium text-slate-400">Available Support</p>
                                     </div>
-                                    <div className="text-center">
-                                        <div className="text-3xl font-bold text-primary mb-2">98%</div>
-                                        <p className="text-sm text-muted-foreground">Student Satisfaction</p>
-                                    </div>
-                                </div>
-                                
-                                <div className="mt-8 p-6 bg-background/80 rounded-lg">
-                                    <h3 className="font-semibold mb-3">Our Core Values</h3>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                                        <div className="flex items-center space-x-2">
-                                            <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                            <span>Accessibility</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                            <span>Privacy</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                            <span>Inclusivity</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <span className="w-2 h-2 bg-primary rounded-full"></span>
-                                            <span>Innovation</span>
-                                        </div>
+                                    <div className="text-center p-4 bg-white/5 rounded-2xl border border-white/5">
+                                        <div className="text-4xl font-black text-white mb-2">98%</div>
+                                        <p className="text-sm font-medium text-slate-400">Student Satisfaction</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="py-16 md:py-24 bg-primary/5">
-                <div className="container mx-auto px-6 max-w-4xl text-center">
-                    <div className="relative">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                            Ready to Transform Student Mental Health?
-                        </h2>
-                        <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                            Join leading educational institutions in creating a supportive environment where every student can thrive mentally and academically
-                        </p>
-                        
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <Button asChild size="lg" className="px-8 bg-green-600 hover:bg-green-700">
-                                <Link href="/register">
-                                    Get Started Today
-                                </Link>
-                            </Button>
-                            <Button asChild size="lg" variant="outline" className="px-8">
-                                <Link href="/login">
-                                    Sign In
-                                </Link>
-                            </Button>
-                        </div>
-                        
-                        <ProgressiveBlur 
-                            className="absolute inset-0 pointer-events-none opacity-30"
-                            direction="top"
-                            blurLayers={10}
-                            blurIntensity={0.5}
-                        />
-                    </div>
-                </div>
-            </section>
-
-            {/* Footer */}
             <FooterSection />
         </div>
     )

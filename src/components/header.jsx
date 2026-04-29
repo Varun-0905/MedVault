@@ -7,7 +7,8 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import React from 'react'
 
 const menuItems = [
-    { name: 'Psychoeducation Hub', href: '#psychoeducation' },
+    { name: 'Psychoeducation Hub', href: '/resources' },
+    { name: 'Zen Zone', href: '/zen-zone' },
 ]
 
 export const HeroHeader = () => {

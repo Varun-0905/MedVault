@@ -45,7 +45,7 @@ const ConsultPage = () => {
   }, [router])
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return
+    if (!inputMessage.trim() || isTyping) return
 
     const userMessage = {
       id: messages.length + 1,
@@ -54,33 +54,59 @@ const ConsultPage = () => {
       timestamp: new Date()
     }
 
-    setMessages(prev => [...prev, userMessage])
+    const nextMessages = [...messages, userMessage]
+    setMessages(nextMessages)
     setInputMessage('')
     setIsTyping(true)
 
-    // Simulate AI response (you would integrate with your AI chatbot here)
-    setTimeout(() => {
+    try {
+      // Map format to API format
+      const payloadMessages = nextMessages.map((msg) => ({
+        role: msg.type === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      }))
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          messages: payloadMessages,
+          userContext: {
+            sessionId: sessionData?.token || `anon-${Date.now()}`,
+            conversationTopic: 'counseling_session',
+            preferences: 'anonymous'
+          }
+        }),
+      })
+
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to reach AI service')
+      }
+
       const botResponse = {
         id: messages.length + 2,
         type: 'bot',
-        content: generateBotResponse(userMessage.content),
+        content: data.content || data.response || "I'm here to support you.",
         timestamp: new Date()
       }
       setMessages(prev => [...prev, botResponse])
+      
+    } catch (error) {
+      console.error('Chat error:', error)
+      const errorResponse = {
+        id: messages.length + 2,
+        type: 'bot',
+        content: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.",
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, errorResponse])
+    } finally {
       setIsTyping(false)
-    }, 1500)
-  }
-
-  const generateBotResponse = (userInput) => {
-    // Simple response generation - in real implementation, this would be connected to your AI chatbot
-    const responses = [
-      "I understand how you're feeling. It's completely normal to have these thoughts. Can you tell me more about what's been on your mind?",
-      "Thank you for sharing that with me. Your feelings are valid. Have you noticed any specific triggers for these feelings?",
-      "It sounds like you're going through a challenging time. Remember that seeking help is a sign of strength. What kind of support would be most helpful for you right now?",
-      "I hear you, and I want you to know that you're not alone in this. Many students experience similar feelings. What activities usually help you feel better?",
-      "That must be really difficult for you. Your mental health is important. Have you considered talking to a counselor or trusted adult about these feelings?"
-    ]
-    return responses[Math.floor(Math.random() * responses.length)]
+    }
   }
 
   const handleKeyPress = (e) => {

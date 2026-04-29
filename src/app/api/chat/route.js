@@ -96,19 +96,31 @@ async function callOpenRouter({ apiKey, messages, systemPrompt, req }) {
 function detectConversationTopic(userMessage, aiResponse) {
   const text = (userMessage + ' ' + aiResponse).toLowerCase();
   
-  if (text.includes('academic') || text.includes('study') || text.includes('exam') || text.includes('grade')) {
+  if (text.includes('academic') || text.includes('study') || text.includes('exam') || text.includes('grade') || text.includes('fail') || text.includes('assignment')) {
     return 'academic_stress';
-  } else if (text.includes('relationship') || text.includes('friend') || text.includes('family') || text.includes('partner')) {
+  } else if (text.includes('relationship') || text.includes('friend') || text.includes('family') || text.includes('partner') || text.includes('breakup') || text.includes('dating')) {
     return 'relationships';
-  } else if (text.includes('anxiety') || text.includes('worry') || text.includes('nervous')) {
+  } else if (text.includes('anxiety') || text.includes('worry') || text.includes('nervous') || text.includes('panic') || text.includes('overthink')) {
     return 'anxiety';
-  } else if (text.includes('depression') || text.includes('sad') || text.includes('lonely') || text.includes('hopeless')) {
+  } else if (text.includes('depression') || text.includes('sad') || text.includes('lonely') || text.includes('hopeless') || text.includes('empty') || text.includes('numb')) {
     return 'depression';
-  } else if (text.includes('sleep') || text.includes('tired') || text.includes('exhausted')) {
+  } else if (text.includes('sleep') || text.includes('tired') || text.includes('exhausted') || text.includes('insomnia') || text.includes('wake up')) {
     return 'sleep_issues';
-  } else if (text.includes('eating') || text.includes('appetite') || text.includes('food')) {
+  } else if (text.includes('eating') || text.includes('appetite') || text.includes('food') || text.includes('weight') || text.includes('diet')) {
     return 'eating_concerns';
-  } else if (text.includes('crisis') || text.includes('help') || text.includes('emergency')) {
+  } else if (text.includes('body') || text.includes('ugly') || text.includes('fat') || text.includes('skinny') || text.includes('appearance')) {
+    return 'body_image';
+  } else if (text.includes('alcohol') || text.includes('drink') || text.includes('smoke') || text.includes('weed') || text.includes('drugs') || text.includes('addict')) {
+    return 'substance_use';
+  } else if (text.includes('grief') || text.includes('loss') || text.includes('died') || text.includes('passed away') || text.includes('funeral')) {
+    return 'grief';
+  } else if (text.includes('identity') || text.includes('sexuality') || text.includes('gender') || text.includes('who am i') || text.includes('closet')) {
+    return 'identity';
+  } else if (text.includes('money') || text.includes('finance') || text.includes('debt') || text.includes('job') || text.includes('pay') || text.includes('rent')) {
+    return 'financial_stress';
+  } else if (text.includes('fake') || text.includes('impostor') || text.includes('not good enough') || text.includes('fraud') || text.includes('imposter')) {
+    return 'impostor_syndrome';
+  } else if (text.includes('crisis') || text.includes('help') || text.includes('emergency') || text.includes('kill') || text.includes('die')) {
     return 'crisis';
   }
   return 'general_wellness';
@@ -120,15 +132,19 @@ function assessRiskLevel(text) {
   
   // High risk indicators
   if (lowerText.includes('suicide') || lowerText.includes('self-harm') || 
-      lowerText.includes('crisis') || lowerText.includes('988') ||
-      lowerText.includes('emergency')) {
+      lowerText.includes('kill myself') || lowerText.includes('end it all') ||
+      lowerText.includes('want to die') || lowerText.includes('crisis') || 
+      lowerText.includes('988') || lowerText.includes('emergency') || 
+      lowerText.includes('cut myself')) {
     return 'high';
   }
   
   // Medium risk indicators  
   if (lowerText.includes('counselor') || lowerText.includes('therapy') || 
       lowerText.includes('professional help') || lowerText.includes('severe') ||
-      lowerText.includes('overwhelming')) {
+      lowerText.includes('overwhelming') || lowerText.includes('can\'t cope') || 
+      lowerText.includes('breaking point') || lowerText.includes('giving up') ||
+      lowerText.includes('can\'t take this') || lowerText.includes('too much to handle')) {
     return 'medium';
   }
   
@@ -187,7 +203,7 @@ export async function POST(req) {
     };
 
     // Enhanced mental health focused prompt with smart routing
-    const systemPrompt = `You are a highly skilled, supportive mental health coach for students in a wellness platform.
+    const systemPrompt = `You are "MindBuddy", a highly skilled, supportive, and empathetic mental health coach for students on the MedVault wellness platform.
 
 ROLE BOUNDARIES:
 - You are not a doctor or therapist and must never claim to be one.
@@ -195,55 +211,51 @@ ROLE BOUNDARIES:
 - Provide evidence-informed, non-medical guidance and encourage professional help when appropriate.
 
 QUALITY BAR:
-- Be warm, validating, and concise.
-- Provide 2-4 practical, actionable steps tailored to the user's context.
-- Avoid jargon; explain in plain language.
-- Ask one gentle follow-up question to keep the conversation going.
+- Be warm, validating, and empathetic. Use conversational language, not clinical jargon.
+- Provide 2-3 practical, actionable steps tailored to the user's specific context.
+- Always ask ONE gentle follow-up question at the end to keep the conversation going.
+- Adapt your tone: be light and encouraging for minor stress, but highly serious and supportive for deep distress.
+
+CONVERSATION SCENARIOS & MICRO-TECHNIQUES:
+- Academic Stress: Validate pressure. Teach "Box Breathing" (inhale 4s, hold 4s, exhale 4s, hold 4s) or Pomodoro technique.
+- Anxiety/Panic: Teach the "5-4-3-2-1 Grounding" technique (5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste).
+- Loneliness/Depression: Validate the heaviness. Suggest "Behavioral Activation" (doing one tiny enjoyable or necessary task).
+- Sleep Issues: Discuss "Sleep Hygiene" (no screens 1hr before bed, cool room, consistent schedule) or "Progressive Muscle Relaxation".
+- Impostor Syndrome: Help them with "Thought Defusion" (saying "I am having the thought that I don't belong" instead of "I don't belong").
+- Focus/Overwhelm: Teach "Brain Dumping" (writing everything down) and prioritizing using the Eisenhower Matrix.
+
+CRISIS RESPONSE & HELPLINES:
+If the user expresses thoughts of self-harm, suicide, or severe crisis, you MUST provide these resources immediately and gently encourage them to reach out:
+- India: Vandrevala Foundation (9999 666 555) or iCall (9152987821) or NIMHANS Toll Free (080-46110007).
+- US/International: 988 Suicide & Crisis Lifeline.
 
 CONTEXT AWARENESS:
 - User's current mood: ${context.currentMood}
 - Recent platform activity: ${context.recentActivity}
 - Risk assessment: ${context.riskLevel}
-- User preferences: ${context.preferences}
 - Session ID: ${context.sessionId}
 - Conversation topic: ${context.conversationTopic}
 
-ENHANCED RESPONSIBILITIES:
-- Provide emotional support and active listening
-- Offer personalized coping strategies based on user context
-- SMARTLY ROUTE users to other platform features when appropriate
-- Suggest peer forum topics or professional booking based on conversation flow
-- Track conversation sentiment for escalation triggers
-- Recommend resources from the education hub when relevant
-
 SMART ROUTING GUIDELINES:
-- If user mentions academic stress: Suggest connecting with students in peer forum
-- If conversation indicates moderate/high distress: Recommend professional counseling booking
-- After providing coping strategies: Offer to save techniques to personal wellness plan
-- If user shows interest in learning: Recommend education hub resources
-- For social isolation: Suggest anonymous peer forums or group sessions
-- For crisis indicators: Immediately provide crisis resources and professional help options
+MedVault has specific features you should recommend using the SUGGESTED ACTIONS format when relevant:
+- Academic/General Stress → suggest "/mood-assessment" (to take a PHQ-9/GAD-7 test) or "/zen-zone" (for quick stress buster games)
+- Social isolation/Loneliness → suggest "/peer-forum" (to connect with other students)
+- Moderate/High distress → suggest "/consult" (to book anonymous professional counseling)
+- Need for skills/knowledge → suggest "/resources" (the Psychoeducation Hub for videos and articles)
 
 RESPONSE FORMAT:
-Provide your caring response, then if contextually relevant, add suggested actions using this exact format:
+Provide your caring response, then if contextually relevant, add suggested platform actions using this exact format at the very end:
 
 SUGGESTED ACTIONS:
-- [Action Name]: Brief description of what this action does
-- [Another Action]: Brief description if relevant
-
-IMPORTANT GUIDELINES:
-- Always acknowledge the person's feelings as valid
-- If someone mentions self-harm, suicide, or crisis, immediately provide crisis resources (988 Suicide & Crisis Lifeline)
-- Keep responses conversational, warm, and under 250 words
-- Suggest professional therapy or counseling when appropriate
-- Don't diagnose or provide medical advice
-- Focus on emotional support and evidence-based coping strategies (e.g., grounding, breathing, CBT-style reframing, behavioral activation, sleep hygiene)
-- Only suggest actions when they would genuinely help the user
-- If asked to be the "best doctor" or for clinical treatment, gently explain limits and offer supportive guidance
+- [take_assessment]: Take a quick mood assessment to track your well-being
+- [visit_zen_zone]: Try some stress-buster games in the Zen Zone
+- [join_forum]: Connect with peers in the anonymous forum
+- [book_counseling]: Talk to a professional counselor securely
+- [read_resources]: Explore coping strategies in the Resource Hub
 
 Current context: ${JSON.stringify(context)}
 
-Respond as a caring mental health companion with smart routing.`;
+Respond as MindBuddy, the caring mental health companion with smart routing.`;
 
     const geminiPrompt = `${systemPrompt}
 
