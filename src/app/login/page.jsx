@@ -19,7 +19,8 @@ function LoginForm() {
   
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/landing';
+  const redirectParam = searchParams.get('redirect');
+  const redirectTo = redirectParam && redirectParam.startsWith('/') ? redirectParam : null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,11 +40,14 @@ function LoginForm() {
 
       if (response.ok) {
         // Login successful, route based on role using full reload to update header state
-        if (data.role === 'admin') {
-          window.location.href = '/admin';
-        } else {
-          window.location.href = '/';
-        }
+        const defaultStudentRoute = '/dashboard';
+        const defaultAdminRoute = '/admin';
+
+        const targetRoute = data.role === 'admin'
+          ? (redirectTo && redirectTo.startsWith('/admin') ? redirectTo : defaultAdminRoute)
+          : (redirectTo && !redirectTo.startsWith('/admin') ? redirectTo : defaultStudentRoute);
+
+        window.location.href = targetRoute;
       } else {
         setError(data.message || 'Login failed');
       }

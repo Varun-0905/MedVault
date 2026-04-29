@@ -9,7 +9,7 @@ export default function AIChat() {
     {
       id: 1,
       type: 'bot',
-      content: "Hello! I'm your AI mental health companion. I'm here to listen, provide support, and help you work through any challenges you're facing. How are you feeling today?",
+      content: "Hello! I'm your AI mental wellness coach. I can offer supportive guidance and practical coping tools, but I'm not a doctor. How are you feeling today?",
       timestamp: new Date(),
     }
   ]);
@@ -26,56 +26,66 @@ export default function AIChat() {
   }, [messages]);
 
   const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
+    const trimmed = inputValue.trim();
+    if (!trimmed || isLoading) return;
 
     const userMessage = {
-      id: messages.length + 1,
+      id: `user-${Date.now()}`,
       type: 'user',
-      content: inputValue,
+      content: trimmed,
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    const currentInput = inputValue;
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
     setInputValue('');
     setIsLoading(true);
 
     try {
+      const payloadMessages = nextMessages.map((message) => ({
+        role: message.type === 'user' ? 'user' : 'assistant',
+        content: message.content,
+      }));
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: currentInput }),
+        body: JSON.stringify({ messages: payloadMessages }),
       });
 
       const data = await response.json();
-      
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Failed to reach AI service');
+      }
+
       const botResponse = {
-        id: messages.length + 2,
+        id: `assistant-${Date.now()}`,
         type: 'bot',
-        content: data.response || "I'm here to support you. Could you tell me more about what you're experiencing?",
+        content: data.content || data.response || "I'm here to support you. Could you tell me more about what you're experiencing?",
+        suggestedActions: Array.isArray(data.suggestedActions) ? data.suggestedActions : [],
         timestamp: new Date(),
       };
-      
+
       setMessages(prev => [...prev, botResponse]);
     } catch (error) {
       console.error('Error sending message:', error);
-      
+
       const errorResponse = {
-        id: messages.length + 2,
+        id: `error-${Date.now()}`,
         type: 'bot',
-        content: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment, or if you're in crisis, contact 988 for immediate support.",
+        content: error?.message || "I'm sorry, I'm having trouble connecting right now. Please try again in a moment, or if you're in crisis, contact 988 for immediate support.",
         timestamp: new Date(),
       };
-      
+
       setMessages(prev => [...prev, errorResponse]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -118,6 +128,15 @@ export default function AIChat() {
                   }`}
                 >
                   <p className="text-sm">{message.content}</p>
+                  {message.suggestedActions?.length > 0 && (
+                    <ul className="mt-2 space-y-1 text-xs text-gray-600">
+                      {message.suggestedActions.map((action, index) => (
+                        <li key={`${action.title}-${index}`}>
+                          <span className="font-medium">{action.title}:</span> {action.description}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   <p className={`text-xs mt-1 ${
                     message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
                   }`}>
@@ -151,7 +170,7 @@ export default function AIChat() {
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 placeholder="Type your message here..."
                 className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                 rows="2"
@@ -166,7 +185,7 @@ export default function AIChat() {
               </Button>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Press Enter to send, Shift+Enter for new line. This AI is powered by Gemini for support - in crisis, call 988.
+              Press Enter to send, Shift+Enter for new line. This AI provides supportive guidance, not medical advice. In crisis, call 988.
             </p>
           </div>
 
@@ -183,7 +202,7 @@ export default function AIChat() {
             <div className="ml-3">
               <h3 className="text-sm font-medium text-yellow-800">Important Notice</h3>
               <div className="mt-2 text-sm text-yellow-700">
-                <p>This AI assistant provides supportive conversations but is not a replacement for professional mental health care. If you're experiencing a mental health emergency, please contact emergency services or call the National Suicide Prevention Lifeline at 988.</p>
+                <p>This AI assistant provides supportive conversations and coping tips but is not a doctor or therapist. If you're experiencing a mental health emergency, please contact emergency services or call the National Suicide Prevention Lifeline at 988.</p>
               </div>
             </div>
           </div>

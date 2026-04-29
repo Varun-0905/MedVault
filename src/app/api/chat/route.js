@@ -1,7 +1,96 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const MODEL_CACHE_TTL_MS = 1000 * 60 * 60;
+let cachedModels = null;
+let cachedModelsFetchedAt = 0;
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
+async function fetchAvailableModels(apiKey) {
+  if (cachedModels && Date.now() - cachedModelsFetchedAt < MODEL_CACHE_TTL_MS) {
+    return cachedModels;
+  }
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Model list fetch failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const models = (data.models || [])
+      .filter((model) => model.supportedGenerationMethods?.includes('generateContent'))
+      .map((model) => model.name?.replace('models/', ''))
+      .filter(Boolean);
+
+    cachedModels = [...new Set(models)];
+    cachedModelsFetchedAt = Date.now();
+  } catch (error) {
+    console.warn('Failed to list Gemini models:', error?.message || error);
+  }
+
+  return cachedModels || [];
+}
+
+async function callOpenRouter({ apiKey, messages, systemPrompt, req }) {
+  const referer = req.headers.get('origin') || req.headers.get('referer') || 'http://localhost:3000';
+  const appTitle = process.env.OPENROUTER_APP_TITLE || 'MedVault';
+  const modelsToTry = [
+    process.env.OPENROUTER_MODEL,
+    'openai/gpt-4o',
+    'anthropic/claude-3.5-sonnet',
+    'openai/gpt-4o-mini'
+  ].filter(Boolean);
+
+  const chatMessages = messages
+    .filter((message) => message?.role === 'user' || message?.role === 'assistant')
+    .map((message) => ({
+      role: message.role,
+      content: message.content
+    }));
+
+  let lastError;
+
+  for (const model of modelsToTry) {
+    try {
+      const response = await fetch(OPENROUTER_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': referer,
+          'X-Title': appTitle
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'system', content: systemPrompt }, ...chatMessages],
+          temperature: 0.7,
+          max_tokens: 700
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error?.message || `OpenRouter error: ${response.status}`);
+      }
+
+      const text = data?.choices?.[0]?.message?.content?.trim();
+      if (!text) {
+        throw new Error('OpenRouter returned an empty response');
+      }
+
+      return { text, model };
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error('OpenRouter request failed');
+}
 
 // Helper function to detect conversation topic
 function detectConversationTopic(userMessage, aiResponse) {
@@ -48,27 +137,43 @@ function assessRiskLevel(text) {
 
 export async function POST(req) {
   try {
-    // Check if API key is available
-    if (!process.env.GEMINI_API_KEY) {
-      console.error('GEMINI_API_KEY is not set in environment variables');
-      return NextResponse.json({
-        id: `msg-${Date.now()}`,
-        role: 'assistant',
-        content: "I'm sorry, but my AI service is not properly configured. Please contact support."
-      });
+    const { messages: rawMessages, message, userContext } = await req.json();
+    const messages = Array.isArray(rawMessages) ? rawMessages : [];
+
+    if (messages.length === 0 && typeof message === 'string' && message.trim()) {
+      messages.push({ role: 'user', content: message.trim() });
     }
 
-    const { messages, userContext } = await req.json();
-
-    if (!messages || messages.length === 0) {
+    if (messages.length === 0) {
       return NextResponse.json(
         { error: 'Messages are required' },
         { status: 400 }
       );
     }
 
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const openRouterKey = process.env.OPENROUTER_API_KEY;
+
+    if (!geminiKey && !openRouterKey) {
+      console.error('No AI provider API key is set in environment variables');
+      return NextResponse.json({
+        id: `msg-${Date.now()}`,
+        role: 'assistant',
+        content: "I'm sorry, but my AI service is not properly configured. Please contact support.",
+        response: "I'm sorry, but my AI service is not properly configured. Please contact support.",
+        error: 'No AI provider key is set',
+        errorType: 'missing_key'
+      });
+    }
+
     // Get the latest user message
-    const userMessage = messages[messages.length - 1].content;
+    const userMessage = messages[messages.length - 1]?.content;
+    if (!userMessage) {
+      return NextResponse.json(
+        { error: 'Message content is required' },
+        { status: 400 }
+      );
+    }
 
     // Default userContext if not provided
     const context = {
@@ -81,19 +186,19 @@ export async function POST(req) {
       lastInteraction: userContext?.lastInteraction || new Date().toISOString()
     };
 
-    // List of models to try (free tier compatible)
-    const modelsToTry = [
-      'gemini-1.5-flash',
-      'gemini-1.5-flash-latest', 
-      'gemini-pro',
-      'models/gemini-1.5-flash'
-    ];
-
-    let result;
-    let lastError;
-
     // Enhanced mental health focused prompt with smart routing
-    const prompt = `You are a compassionate AI mental health companion for college students integrated into a comprehensive wellness platform.
+    const systemPrompt = `You are a highly skilled, supportive mental health coach for students in a wellness platform.
+
+ROLE BOUNDARIES:
+- You are not a doctor or therapist and must never claim to be one.
+- Do not diagnose, prescribe, or provide medical advice.
+- Provide evidence-informed, non-medical guidance and encourage professional help when appropriate.
+
+QUALITY BAR:
+- Be warm, validating, and concise.
+- Provide 2-4 practical, actionable steps tailored to the user's context.
+- Avoid jargon; explain in plain language.
+- Ask one gentle follow-up question to keep the conversation going.
 
 CONTEXT AWARENESS:
 - User's current mood: ${context.currentMood}
@@ -132,43 +237,93 @@ IMPORTANT GUIDELINES:
 - Keep responses conversational, warm, and under 250 words
 - Suggest professional therapy or counseling when appropriate
 - Don't diagnose or provide medical advice
-- Focus on emotional support and evidence-based coping strategies
+- Focus on emotional support and evidence-based coping strategies (e.g., grounding, breathing, CBT-style reframing, behavioral activation, sleep hygiene)
 - Only suggest actions when they would genuinely help the user
+- If asked to be the "best doctor" or for clinical treatment, gently explain limits and offer supportive guidance
 
-Student message: "${userMessage}"
 Current context: ${JSON.stringify(context)}
 
-Respond as a caring mental health companion with smart routing:`;
+Respond as a caring mental health companion with smart routing.`;
 
-    // Try different models until one works
-    for (const modelName of modelsToTry) {
+    const geminiPrompt = `${systemPrompt}
+
+Student message: "${userMessage}"`;
+
+    let result;
+    let lastError;
+    let text;
+    let provider = 'gemini';
+    let modelUsed;
+
+    if (openRouterKey) {
       try {
-        console.log(`Trying model: ${modelName}`);
-        const model = genAI.getGenerativeModel({ model: modelName });
-        
-        console.log('Calling Gemini API with user message:', userMessage);
-        console.log('User context:', context);
-        result = await model.generateContent(prompt);
-        
-        // If we get here, the model worked
-        console.log('Successfully got response from model:', modelName);
-        break;
-        
+        const openRouterResult = await callOpenRouter({
+          apiKey: openRouterKey,
+          messages,
+          systemPrompt,
+          req
+        });
+        text = openRouterResult.text;
+        provider = 'openrouter';
+        modelUsed = openRouterResult.model;
       } catch (error) {
-        console.log(`Model ${modelName} failed:`, error.message);
         lastError = error;
-        continue;
       }
     }
 
-    // If no model worked, throw the last error
-    if (!result) {
+    if (!text && geminiKey) {
+      const genAI = new GoogleGenerativeAI(geminiKey);
+      const availableModels = await fetchAvailableModels(geminiKey);
+      const preferredModels = [
+        'gemini-2.0-pro',
+        'gemini-1.5-pro',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-latest',
+        'gemini-pro'
+      ];
+
+      let modelsToTry = preferredModels.filter((model) => availableModels.includes(model));
+
+      if (modelsToTry.length === 0) {
+        modelsToTry = availableModels.length > 0
+          ? availableModels
+          : ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro'];
+      }
+
+      // Try different models until one works
+      for (const modelName of modelsToTry) {
+        try {
+          console.log(`Trying model: ${modelName}`);
+          const model = genAI.getGenerativeModel({ model: modelName });
+          
+          console.log('Calling Gemini API with user message:', userMessage);
+          console.log('User context:', context);
+          result = await model.generateContent(geminiPrompt);
+          
+          // If we get here, the model worked
+          console.log('Successfully got response from model:', modelName);
+          modelUsed = modelName;
+          provider = 'gemini';
+          break;
+          
+        } catch (error) {
+          console.log(`Model ${modelName} failed:`, error.message);
+          lastError = error;
+          continue;
+        }
+      }
+    }
+
+    if (!text && !result) {
       console.error('All models failed. Last error:', lastError);
       throw lastError || new Error('All models failed');
     }
-    
-    const response = await result.response;
-    const text = response.text();
+
+    if (!text && result) {
+      const response = await result.response;
+      text = response.text();
+    }
 
     console.log('Gemini API response received successfully:', text.substring(0, 100) + '...');
 
@@ -219,18 +374,21 @@ Respond as a caring mental health companion with smart routing:`;
       id: `msg-${Date.now()}`,
       role: 'assistant',
       content: cleanText,
+      response: cleanText,
       suggestedActions: suggestedActions,
       contextualRouting: contextualRouting,
       metadata: {
         detectedTopic,
         riskLevel,
         sessionId: context.sessionId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        provider,
+        model: modelUsed
       }
     });
 
   } catch (error) {
-    console.error('Detailed error calling Gemini API:', {
+    console.error('Detailed error calling AI API:', {
       message: error.message,
       stack: error.stack,
       name: error.name
@@ -238,17 +396,27 @@ Respond as a caring mental health companion with smart routing:`;
     
     // More specific fallback response based on error type
     let fallbackMessage = "I'm here to listen and support you. It seems I'm having trouble connecting right now, but please know that your feelings are important. If you're in crisis, please reach out to the 988 Suicide & Crisis Lifeline or contact emergency services.";
-    
-    if (error.message?.includes('API_KEY')) {
+    let errorType = 'unknown';
+    const errorMessage = error?.message || '';
+
+    if (errorMessage.includes('API_KEY') || errorMessage.toLowerCase().includes('api key')) {
       fallbackMessage = "I'm experiencing a configuration issue. Please try again in a moment or contact support if the problem persists.";
-    } else if (error.message?.includes('quota')) {
+      errorType = 'invalid_key';
+    } else if (errorMessage.toLowerCase().includes('quota')) {
       fallbackMessage = "I'm temporarily unavailable due to high usage. Please try again in a few minutes.";
+      errorType = 'quota';
+    } else if (errorMessage.toLowerCase().includes('model')) {
+      fallbackMessage = "I'm temporarily unavailable due to a model issue. Please try again shortly.";
+      errorType = 'model_unavailable';
     }
-    
+
     return NextResponse.json({
       id: `msg-${Date.now()}`,
-      role: 'assistant', 
-      content: fallbackMessage
+      role: 'assistant',
+      content: fallbackMessage,
+      response: fallbackMessage,
+      error: errorMessage,
+      errorType
     });
   }
 }

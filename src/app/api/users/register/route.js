@@ -15,6 +15,13 @@ export async function POST(req) {
     const body = await req.json();
     const { email, password, name, role } = schema.parse(body);
 
+    if (!process.env.MONGODB_URI) {
+      return NextResponse.json(
+        { message: 'Database is not configured. Please use demo accounts or set MONGODB_URI.' },
+        { status: 503 }
+      );
+    }
+
     // Check if user already exists
     const existingUser = await getUserByEmail(email);
     if (existingUser) {

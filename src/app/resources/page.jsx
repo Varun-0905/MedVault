@@ -13,31 +13,35 @@ const ResourcesPage = () => {
             title: "Stress Management",
             icon: "🧠",
             color: "blue",
-            description: "Learn effective techniques to identify, understand, and manage academic and personal stress.",
+            description: "Evidence-informed tools for exam pressure, workload stress, and nervous system regulation.",
             resources: [
                 {
                     title: "Progressive Muscle Relaxation Guide",
                     type: "Video",
                     duration: "15 min",
-                    description: "Step-by-step guide to relieve physical tension and mental stress."
+                    description: "Step-by-step guidance to release physical tension and calm the body.",
+                    recommendedFor: "physical tension, restlessness, end-of-day stress"
                 },
                 {
                     title: "Breathing Exercises for Anxiety",
                     type: "Audio",
                     duration: "10 min",
-                    description: "Guided breathing techniques for immediate stress relief."
+                    description: "Guided breathing techniques for quick, steadying relief.",
+                    recommendedFor: "stress spikes, pre-exam nerves, racing thoughts"
                 },
                 {
                     title: "Time Management Workbook",
                     type: "PDF",
                     pages: "24 pages",
-                    description: "Practical strategies for managing academic workload effectively."
+                    description: "Practical planning strategies for heavy academic workloads.",
+                    recommendedFor: "overload, missed deadlines, competing priorities"
                 },
                 {
                     title: "Mindfulness for Students",
                     type: "Article",
                     readTime: "8 min",
-                    description: "Introduction to mindfulness practices for daily stress reduction."
+                    description: "Simple mindfulness practices to lower daily stress.",
+                    recommendedFor: "daily stress, mental clutter, difficulty focusing"
                 }
             ]
         },
@@ -45,31 +49,35 @@ const ResourcesPage = () => {
             title: "Anxiety & Depression",
             icon: "💚",
             color: "green",
-            description: "Understand the signs, symptoms, and effective strategies for managing anxiety and depression.",
+            description: "Understand symptoms and learn coping strategies that support anxious or low mood states.",
             resources: [
                 {
                     title: "Understanding Anxiety Disorders",
                     type: "Article",
                     readTime: "12 min",
-                    description: "Comprehensive guide to recognizing and understanding anxiety."
+                    description: "Clear overview of how anxiety works and common patterns.",
+                    recommendedFor: "persistent worry, panic symptoms, overthinking"
                 },
                 {
                     title: "Depression Self-Assessment Tool",
                     type: "Interactive",
                     duration: "5 min",
-                    description: "Self-screening tool to assess depression symptoms."
+                    description: "Self-check to reflect on mood, energy, and interest levels.",
+                    recommendedFor: "low mood, loss of interest, fatigue"
                 },
                 {
                     title: "Cognitive Behavioral Techniques",
                     type: "Video",
                     duration: "20 min",
-                    description: "Learn CBT strategies for managing negative thought patterns."
+                    description: "Learn CBT-style strategies for shifting unhelpful thought loops.",
+                    recommendedFor: "negative self-talk, anxious thinking, rumination"
                 },
                 {
                     title: "Building Support Networks",
                     type: "Guide",
                     readTime: "10 min",
-                    description: "How to create and maintain supportive relationships."
+                    description: "How to build support and communicate needs clearly.",
+                    recommendedFor: "loneliness, isolation, needing encouragement"
                 }
             ]
         },
@@ -77,31 +85,35 @@ const ResourcesPage = () => {
             title: "Academic Wellness",
             icon: "🎯",
             color: "purple",
-            description: "Balance academic success with mental well-being through proven strategies and habits.",
+            description: "Balance academic performance with well-being through habits that reduce pressure.",
             resources: [
                 {
                     title: "Study-Life Balance Planner",
                     type: "Tool",
                     duration: "Interactive",
-                    description: "Plan your schedule to balance academics and personal life."
+                    description: "Build a realistic weekly plan with study blocks and recovery time.",
+                    recommendedFor: "overcommitment, poor schedule balance"
                 },
                 {
                     title: "Dealing with Academic Pressure",
                     type: "Video",
                     duration: "18 min",
-                    description: "Strategies for managing exam stress and academic expectations."
+                    description: "Strategies for exam stress, performance anxiety, and expectations.",
+                    recommendedFor: "exam stress, fear of failure, pressure"
                 },
                 {
                     title: "Goal Setting Framework",
                     type: "Worksheet",
                     pages: "8 pages",
-                    description: "SMART goal setting for academic and personal growth."
+                    description: "SMART goals to reduce overwhelm and increase clarity.",
+                    recommendedFor: "low motivation, unclear priorities"
                 },
                 {
                     title: "Motivation and Procrastination",
                     type: "Article",
                     readTime: "15 min",
-                    description: "Understanding and overcoming procrastination patterns."
+                    description: "Understand procrastination triggers and build momentum.",
+                    recommendedFor: "avoidance, low drive, task paralysis"
                 }
             ]
         },
@@ -109,31 +121,35 @@ const ResourcesPage = () => {
             title: "Relationship Skills",
             icon: "🤝",
             color: "orange",
-            description: "Build healthy relationships and communication skills for better social connections.",
+            description: "Build healthier communication and boundaries for stronger social connections.",
             resources: [
                 {
                     title: "Effective Communication Guide",
                     type: "eBook",
                     pages: "32 pages",
-                    description: "Master the art of clear and empathetic communication."
+                    description: "Frameworks for clear, respectful conversations.",
+                    recommendedFor: "difficult talks, misunderstandings"
                 },
                 {
                     title: "Conflict Resolution Strategies",
                     type: "Video",
                     duration: "25 min",
-                    description: "Learn to resolve conflicts constructively and peacefully."
+                    description: "Step-by-step methods to de-escalate conflict.",
+                    recommendedFor: "roommate conflicts, recurring arguments"
                 },
                 {
                     title: "Setting Healthy Boundaries",
                     type: "Workshop",
                     duration: "45 min",
-                    description: "Interactive workshop on establishing personal boundaries."
+                    description: "Practical scripts and exercises for boundary setting.",
+                    recommendedFor: "people-pleasing, burnout, feeling drained"
                 },
                 {
                     title: "Building Emotional Intelligence",
                     type: "Course",
                     duration: "2 hours",
-                    description: "Develop skills to understand and manage emotions effectively."
+                    description: "Learn to name, understand, and regulate emotions.",
+                    recommendedFor: "emotional overwhelm, relationship strain"
                 }
             ]
         },
@@ -141,31 +157,35 @@ const ResourcesPage = () => {
             title: "Work-Life Balance",
             icon: "⚖️",
             color: "yellow",
-            description: "Learn to balance academics, work, and personal life for optimal mental health.",
+            description: "Protect your energy and time with sustainable routines and boundaries.",
             resources: [
                 {
                     title: "Priority Setting Matrix",
                     type: "Tool",
                     duration: "Interactive",
-                    description: "Eisenhower Matrix for effective priority management."
+                    description: "Eisenhower Matrix for clear, fast prioritization.",
+                    recommendedFor: "too many tasks, decision fatigue"
                 },
                 {
                     title: "Self-Care Checklist",
                     type: "Checklist",
                     items: "50 items",
-                    description: "Daily and weekly self-care activities for students."
+                    description: "Quick daily and weekly habits to protect your wellbeing.",
+                    recommendedFor: "low energy, no routine, neglecting needs"
                 },
                 {
                     title: "Burnout Prevention Guide",
                     type: "Article",
                     readTime: "12 min",
-                    description: "Recognize early signs of burnout and prevention strategies."
+                    description: "Spot early warning signs and adjust before burnout hits.",
+                    recommendedFor: "exhaustion, cynicism, reduced performance"
                 },
                 {
                     title: "Energy Management Techniques",
                     type: "Video",
                     duration: "16 min",
-                    description: "Optimize your energy levels throughout the day."
+                    description: "Build routines for steady energy and focus.",
+                    recommendedFor: "midday slumps, inconsistent focus"
                 }
             ]
         },
@@ -173,31 +193,35 @@ const ResourcesPage = () => {
             title: "Crisis Resources",
             icon: "🆘",
             color: "red",
-            description: "Know when and how to seek help during mental health emergencies and crises.",
+            description: "Know when and how to seek urgent help for yourself or a friend.",
             resources: [
                 {
                     title: "Crisis Hotline Directory",
                     type: "Directory",
                     updated: "Weekly",
-                    description: "24/7 crisis support numbers and online chat services."
+                    description: "24/7 crisis lines and immediate chat support options.",
+                    recommendedFor: "immediate support or urgent safety concerns"
                 },
                 {
                     title: "Emergency Action Plan",
                     type: "Template",
                     pages: "4 pages",
-                    description: "Personal safety plan for mental health emergencies."
+                    description: "Create a simple safety plan and warning-sign checklist.",
+                    recommendedFor: "safety planning and crisis preparation"
                 },
                 {
                     title: "When to Seek Professional Help",
                     type: "Guide",
                     readTime: "8 min",
-                    description: "Understand when it's time to reach out for professional support."
+                    description: "Signs it may be time to reach out for professional care.",
+                    recommendedFor: "symptoms lasting 2+ weeks or getting worse"
                 },
                 {
                     title: "Campus Mental Health Services",
                     type: "Directory",
                     updated: "Monthly",
-                    description: "Find mental health resources available on your campus."
+                    description: "Find counseling, groups, and campus support services.",
+                    recommendedFor: "finding local support and next steps"
                 }
             ]
         }
@@ -268,7 +292,12 @@ const ResourcesPage = () => {
                                                 </span>
                                             </div>
                                             <h3 className="font-semibold mb-2 text-card-foreground">{resource.title}</h3>
-                                            <p className="text-sm text-muted-foreground mb-4">{resource.description}</p>
+                                            <p className="text-sm text-muted-foreground mb-3">{resource.description}</p>
+                                            {resource.recommendedFor && (
+                                                <p className="text-xs text-muted-foreground mb-4">
+                                                    Best for: {resource.recommendedFor}
+                                                </p>
+                                            )}
                                             <Button 
                                                 size="sm" 
                                                 className="w-full"
@@ -364,6 +393,11 @@ const ResourcesPage = () => {
                                         Length: {selectedResource.duration || selectedResource.readTime || selectedResource.pages || selectedResource.items || selectedResource.updated}
                                     </span>
                                 </div>
+                                {selectedResource.recommendedFor && (
+                                    <p className="mt-3 text-sm text-muted-foreground">
+                                        Best for: {selectedResource.recommendedFor}
+                                    </p>
+                                )}
                             </div>
                             <button 
                                 onClick={() => setSelectedResource(null)}
