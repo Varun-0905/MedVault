@@ -1,39 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const MODEL_CACHE_TTL_MS = 1000 * 60 * 60;
-let cachedModels = null;
-let cachedModelsFetchedAt = 0;
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-
-async function fetchAvailableModels(apiKey) {
-  if (cachedModels && Date.now() - cachedModelsFetchedAt < MODEL_CACHE_TTL_MS) {
-    return cachedModels;
-  }
-
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Model list fetch failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const models = (data.models || [])
-      .filter((model) => model.supportedGenerationMethods?.includes('generateContent'))
-      .map((model) => model.name?.replace('models/', ''))
-      .filter(Boolean);
-
-    cachedModels = [...new Set(models)];
-    cachedModelsFetchedAt = Date.now();
-  } catch (error) {
-    console.warn('Failed to list Gemini models:', error?.message || error);
-  }
-
-  return cachedModels || [];
-}
 
 async function callOpenRouter({ apiKey, messages, systemPrompt, req }) {
   const referer = req.headers.get('origin') || req.headers.get('referer') || 'http://localhost:3000';
@@ -167,18 +133,17 @@ export async function POST(req) {
       );
     }
 
-    const geminiKey = process.env.GEMINI_API_KEY;
     const openRouterKey = process.env.OPENROUTER_API_KEY;
 
-    if (!geminiKey && !openRouterKey) {
-      console.error('No AI provider API key is set in environment variables');
+    if (!openRouterKey) {
+      console.error('OPENROUTER_API_KEY is not set in environment variables');
       return NextResponse.json({
         id: `msg-${Date.now()}`,
         role: 'assistant',
         content: "I'm sorry, but my AI service is not properly configured. Please contact support.",
         response: "I'm sorry, but my AI service is not properly configured. Please contact support.",
-        error: 'No AI provider key is set',
-        errorType: 'missing_key'
+        error: 'OpenRouter API key is missing',
+        errorType: 'missing_openrouter_key'
       });
     }
 
@@ -257,87 +222,25 @@ Current context: ${JSON.stringify(context)}
 
 Respond as MindBuddy, the caring mental health companion with smart routing.`;
 
-    const geminiPrompt = `${systemPrompt}
-
-Student message: "${userMessage}"`;
-
-    let result;
-    let lastError;
     let text;
-    let provider = 'gemini';
+    let provider = 'openrouter';
     let modelUsed;
 
-    if (openRouterKey) {
-      try {
-        const openRouterResult = await callOpenRouter({
-          apiKey: openRouterKey,
-          messages,
-          systemPrompt,
-          req
-        });
-        text = openRouterResult.text;
-        provider = 'openrouter';
-        modelUsed = openRouterResult.model;
-      } catch (error) {
-        lastError = error;
-      }
+    try {
+      const openRouterResult = await callOpenRouter({
+        apiKey: openRouterKey,
+        messages,
+        systemPrompt,
+        req
+      });
+      text = openRouterResult.text;
+      modelUsed = openRouterResult.model;
+    } catch (error) {
+      console.error('OpenRouter request failed:', error);
+      throw error;
     }
 
-    if (!text && geminiKey) {
-      const genAI = new GoogleGenerativeAI(geminiKey);
-      const availableModels = await fetchAvailableModels(geminiKey);
-      const preferredModels = [
-        'gemini-2.0-pro',
-        'gemini-1.5-pro',
-        'gemini-2.0-flash',
-        'gemini-1.5-flash',
-        'gemini-1.5-flash-latest',
-        'gemini-pro'
-      ];
-
-      let modelsToTry = preferredModels.filter((model) => availableModels.includes(model));
-
-      if (modelsToTry.length === 0) {
-        modelsToTry = availableModels.length > 0
-          ? availableModels
-          : ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro'];
-      }
-
-      // Try different models until one works
-      for (const modelName of modelsToTry) {
-        try {
-          console.log(`Trying model: ${modelName}`);
-          const model = genAI.getGenerativeModel({ model: modelName });
-          
-          console.log('Calling Gemini API with user message:', userMessage);
-          console.log('User context:', context);
-          result = await model.generateContent(geminiPrompt);
-          
-          // If we get here, the model worked
-          console.log('Successfully got response from model:', modelName);
-          modelUsed = modelName;
-          provider = 'gemini';
-          break;
-          
-        } catch (error) {
-          console.log(`Model ${modelName} failed:`, error.message);
-          lastError = error;
-          continue;
-        }
-      }
-    }
-
-    if (!text && !result) {
-      console.error('All models failed. Last error:', lastError);
-      throw lastError || new Error('All models failed');
-    }
-
-    if (!text && result) {
-      const response = await result.response;
-      text = response.text();
-    }
-
-    console.log('Gemini API response received successfully:', text.substring(0, 100) + '...');
+    console.log('OpenRouter response received successfully:', text.substring(0, 100) + '...');
 
     // Parse AI response for suggested actions
     let suggestedActions = [];
